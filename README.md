@@ -1,6 +1,6 @@
 # RSS to X (Twitter) Bot
 
-This is a Python script that fetches news from various RSS feeds (Google News, BBC, Reuters) and automatically posts selected items to an X (formerly Twitter) account.
+This is a Python script that fetches news from various RSS feeds (Google News, BBC) and automatically posts selected items to an X (formerly Twitter) account.
 
 ## Features
 
@@ -8,6 +8,7 @@ This is a Python script that fetches news from various RSS feeds (Google News, B
 - Randomly selects a configurable number of items to post each run.
 - Posts news title, source, and link to X.
 - Includes a random delay between posts to mimic human behavior.
+- **Dry-run mode:** If no credentials are provided, the script logs intended posts without sending them to X.
 
 ## Prerequisites
 
@@ -29,22 +30,26 @@ This is a Python script that fetches news from various RSS feeds (Google News, B
 
 ## Configuration
 
-Open `rss_to_x.py` and configure the following variables:
-
 ### API Keys
-Replace the placeholder strings with your actual X API credentials:
+The script uses environment variables for authentication. Set the following variables in your environment:
 
-```python
-X_API_KEY = "YOUR_X_API_KEY"
-X_API_SECRET = "YOUR_X_API_SECRET"
-X_ACCESS_TOKEN = "YOUR_X_ACCESS_TOKEN"
-X_ACCESS_SECRET = "YOUR_X_ACCESS_SECRET"
+- `X_API_KEY`
+- `X_API_SECRET`
+- `X_ACCESS_TOKEN`
+- `X_ACCESS_SECRET`
+
+Example (Linux/macOS):
+```bash
+export X_API_KEY="your_api_key"
+export X_API_SECRET="your_api_secret"
+export X_ACCESS_TOKEN="your_access_token"
+export X_ACCESS_SECRET="your_access_secret"
 ```
 
-> **Note:** For a production deployment, it is recommended to use environment variables instead of hardcoding credentials in the script.
+If these variables are not set, the script will run in **dry-run mode**, logging the posts to the console instead of publishing them.
 
 ### Settings
-You can adjust the behavior by modifying these constants:
+You can adjust the behavior by modifying the constants in `rss_to_x.py`:
 
 - `RSS_FEEDS`: Add or remove RSS feed URLs.
 - `POSTS_PER_DAY`: Number of posts to make per run (default: 10).
