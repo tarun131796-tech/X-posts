@@ -93,7 +93,8 @@ def post_to_x(api, item):
         except Exception as e:
             logger.error(f"Failed to post item {item['title']}: {e}")
     else:
-        logger.info(f"[DRY RUN] Would post: {text[:280].replace('\n', ' ')}")
+        log_text = text[:280].replace('\n', ' ')
+        logger.info(f"[DRY RUN] Would post: {log_text}")
 
 # -------- MAIN --------
 
