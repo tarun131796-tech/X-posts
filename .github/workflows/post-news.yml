@@ -1,34 +1,96 @@
-name: Daily News Posts
+name: X Monetization Bot - Daily Posts with Gemini
 
 on:
   schedule:
-    - cron: '0 8 * * *'  # Every day at 8:00 AM UTC (adjust timezone as needed)
-  workflow_dispatch:  # Allows manual trigger
+    # Post 3 times per day for better distribution
+    - cron: '0 8 * * *'   # 8 AM UTC - Morning batch (posts 1-4)
+    - cron: '0 14 * * *'  # 2 PM UTC - Afternoon batch (posts 5-7)
+    - cron: '0 20 * * *'  # 8 PM UTC - Evening batch (posts 8-10)
+  
+  workflow_dispatch: # Manual trigger for testing
 
 jobs:
-  post-news:
+  post-valuable-content:
     runs-on: ubuntu-latest
+    
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-
+      
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-
+      
       - name: Install dependencies
         run: |
-          pip install tweepy requests gitpython
-
-      - name: Run news poster
+          pip install tweepy requests
+      
+      - name: Configure Git
+        run: |
+          git config user.name "X Monetization Bot"
+          git config user.email "bot@github-actions.com"
+      
+      - name: Run monetization bot with Gemini 2.5 Flash
         env:
+          # X/Twitter API credentials
           X_API_KEY: ${{ secrets.X_API_KEY }}
           X_API_SECRET: ${{ secrets.X_API_SECRET }}
           X_ACCESS_TOKEN: ${{ secrets.X_ACCESS_TOKEN }}
           X_ACCESS_SECRET: ${{ secrets.X_ACCESS_SECRET }}
           X_BEARER_TOKEN: ${{ secrets.X_BEARER_TOKEN }}
+          
+          # News API
           NEWS_API_KEY: ${{ secrets.NEWS_API_KEY }}
-        run: python post_news.py
+          
+          # Gemini API (FREE!)
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        
+        run: python monetization_bot.py
+      
+      - name: Commit analytics and logs
+        run: |
+          git add post_analytics.json posted_news.log || true
+          git commit -m "📊 Update analytics - $(date +'%Y-%m-%d %H:%M')" || true
+          git push || true
+      
+      - name: Upload analytics artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: post-analytics-${{ github.run_number }}
+          path: |
+            post_analytics.json
+            posted_news.log
+          retention-days: 30
+
+  # Optional: Weekly performance report
+  weekly-analytics:
+    runs-on: ubuntu-latest
+    if: github.event.schedule == '0 8 * * 0' # Sunday 8 AM only
+    needs: post-valuable-content
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Generate performance report
+        run: |
+          echo "📊 Weekly Performance Report" > weekly_report.md
+          echo "Generated: $(date)" >> weekly_report.md
+          echo "" >> weekly_report.md
+          
+          # Count posts this week
+          if [ -f post_analytics.json ]; then
+            POSTS=$(cat post_analytics.json | grep -c "tweet_id" || echo "0")
+            echo "Total posts this week: $POSTS" >> weekly_report.md
+          else
+            echo "No analytics data yet" >> weekly_report.md
+          fi
+      
+      - name: Commit report
+        run: |
+          git add weekly_report.md
+          git commit -m "📈 Weekly analytics report" || echo "No changes to commit"
+          git push || echo "Nothing to push"
