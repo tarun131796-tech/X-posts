@@ -96,7 +96,7 @@ Do not use hashtags. Be direct and punchy."""
 
     try:
         # Gemini 2.5 Flash API endpoint
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key={GEMINI_API_KEY}"
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-exp:generateContent?key={GEMINI_API_KEY}"
         
         payload = {
             "contents": [{
